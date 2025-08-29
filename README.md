@@ -1,21 +1,99 @@
-This is a tool that lets you use MacBook Pro Retina's highest and unsupported resolutions.
-As an example, a Retina MacBook Pro 13" can be set to 3360×2100 maximum resolution, as
-opposed to Apple's max supported 1680×1050. It is accessible from the menu bar.
+# godisplay
 
-![rdm-screenshot](https://cloud.githubusercontent.com/assets/3484242/7100316/255a7d74-dff0-11e4-9bf9-16e726336e29.png)
+A lightweight CLI tool for managing display resolutions on macOS without GUI overhead.
 
-You should prefer resolutions marked with ⚡️ (lightning), which indicates the resolution
-is HiDPI or 2× or more dense in pixels.
+## Features
 
-For more practical results, add RDM.app to your Login Items in **System Preferences ➡ Users & Groups ➡ Login Items**.
-This way RDM will run automatically on startup.
+- **List displays** - Show all connected displays and their available resolutions
+- **Set resolution** - Change display resolution via command line
+- **Multiple formats** - Support for mode numbers, resolution strings, and refresh rates
+- **HiDPI support** - Native support for Retina displays with @2x notation
+- **JSON output** - Machine-readable output for scripting
+- **Grouping** - Group resolutions by aspect ratio for easier browsing
 
-This software was studied and released [here](http://garethjenkins.com/2012/07/01/investigating-a-high-resolution-retina-utility-for-macbook-pro-1x-and-2x-modes/#comment-623)
-and [here](http://www.reddit.com/r/apple/comments/vi9yf/set_your_retina_macbook_pros_resolution_to/)
-by its original authors. I just improved the build system and Makefile, fixed the icon,
-added support for easy installable package (PKG, DMG) and improved the way menu is
-displayed. I don't know what is the license by its authors because it came 100%
-uncommented and undocumented. But I'm sure they would enjoy you to freely use it. Me too.
+## Requirements
 
-Want installable binary package? [It is here](http://avi.alkalay.net/software/RDM/).
+- macOS 10.15 (Catalina) or later
+- Go 1.25+ (for building from source)
+- Cannot run in sandboxed environments
 
+## Installation
+
+### From Source
+
+```bash
+git clone https://github.com/ncode/godisplay.git
+cd godisplay
+go build -o godisplay main.go
+```
+
+### Usage
+
+```bash
+# List all displays and their resolutions
+./godisplay list
+
+# List with resolutions grouped by aspect ratio
+./godisplay list --group
+
+# List specific display
+./godisplay list --display 1
+
+# Set resolution using mode number
+./godisplay set 1 84
+
+# Set resolution using resolution string
+./godisplay set 1 1920x1080
+
+# Set resolution with refresh rate
+./godisplay set 1 1920x1080@120
+
+# Set HiDPI resolution (Retina)
+./godisplay set 1 1920x1080@2x
+
+# Output in JSON format
+./godisplay list --json
+```
+
+## Commands
+
+### `list`
+List all connected displays and their available resolution modes.
+
+**Flags:**
+- `-a, --all` - Show all modes including duplicates
+- `-d, --display` - Show modes for specific display ID
+- `-g, --group` - Group resolutions by aspect ratio
+- `-j, --json` - Output in JSON format
+- `-v, --verbose` - Verbose output
+
+### `set`
+Set the resolution for a specific display.
+
+**Arguments:**
+- `<display-id>` - The display number (1, 2, etc.)
+- `<resolution>` - Resolution in one of these formats:
+  - Mode number: `42`
+  - Resolution: `1920x1080`
+  - With refresh: `1920x1080@60`
+  - HiDPI mode: `1920x1080@2x`
+
+## Examples
+
+```bash
+# List all displays with current resolution highlighted
+./godisplay list
+
+# Set main display to 4K at 60Hz
+./godisplay set 1 3840x2160@60
+
+# Use mode number directly (faster)
+./godisplay set 1 126
+
+# Get machine-readable output for scripting
+./godisplay list --json | jq '.displays[0].current'
+```
+
+## Configuration
+
+Configuration file is optional and located at `$HOME/.godisplay.yaml` by default. You can specify a different config file using the `--config` flag.
